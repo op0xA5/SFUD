@@ -287,6 +287,10 @@ typedef struct {
     sfud_sfdp sfdp;                              /**< serial flash discoverable parameters by JEDEC standard */
 #endif
 
+#ifdef SFUD_UNIQUE_ID
+    uint64_t unique_id;
+#endif
+
 } sfud_flash, *sfud_flash_t;
 
 #ifdef __cplusplus

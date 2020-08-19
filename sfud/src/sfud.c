@@ -70,6 +70,7 @@ static sfud_err aai_write(const sfud_flash *flash, uint32_t addr, size_t size, c
 static sfud_err wait_busy(const sfud_flash *flash);
 static sfud_err reset(const sfud_flash *flash);
 static sfud_err read_jedec_id(sfud_flash *flash);
+static sfud_err read_unique_id(sfud_flash *flash);
 static sfud_err set_write_enabled(const sfud_flash *flash, bool enabled);
 static sfud_err set_4_byte_address_mode(sfud_flash *flash, bool enabled);
 static void make_adress_byte_array(const sfud_flash *flash, uint32_t addr, uint8_t *array);
@@ -272,6 +273,13 @@ static sfud_err hardware_init(sfud_flash *flash) {
             return result;
         }
 
+#ifdef SFUD_UNIQUE_ID
+        result = read_unique_id(flash);
+        if (result != SFUD_SUCCESS) {
+            return result;
+        }
+#endif
+        
 #ifdef SFUD_USING_SFDP
         extern bool sfud_read_sfdp(sfud_flash *flash);
         /* read SFDP parameters */
@@ -862,6 +870,29 @@ static sfud_err read_jedec_id(sfud_flash *flash) {
                 flash->chip.mf_id, flash->chip.type_id, flash->chip.capacity_id);
     } else {
         SFUD_INFO("Error: Read flash device JEDEC ID error.");
+    }
+
+    return result;
+}
+
+static sfud_err read_unique_id(sfud_flash *flash) {
+    sfud_err result = SFUD_SUCCESS;
+    const sfud_spi *spi = &flash->spi;
+    uint8_t cmd[] = {
+        SFUD_CMD_READ_UNIQUE_ID,
+        SFUD_DUMMY_DATA,
+        SFUD_DUMMY_DATA,
+        SFUD_DUMMY_DATA,
+        SFUD_DUMMY_DATA,
+    };
+    uint8_t recv_data[8];
+
+    SFUD_ASSERT(flash);
+    result = spi->wr(spi, cmd, sizeof(cmd), recv_data, sizeof(recv_data));
+    if (result == SFUD_SUCCESS) {
+        flash->unique_id = *(uint64_t *)(recv_data);
+    } else {
+        SFUD_INFO("Error: Read flash Unique ID error.");
     }
 
     return result;

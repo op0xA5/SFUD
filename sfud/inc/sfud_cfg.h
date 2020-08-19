@@ -35,6 +35,8 @@
 
 #define SFUD_USING_FLASH_INFO_TABLE
 
+// #define SFUD_UNIQUE_ID
+
 enum {
     SFUD_XXXX_DEVICE_INDEX = 0,
 };
@@ -45,5 +47,8 @@ enum {
 }
 
 #define SFUD_USING_QSPI
+
+
+
 
 #endif /* _SFUD_CFG_H_ */
